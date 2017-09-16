@@ -2,6 +2,7 @@ menu:
     Blog: /
     Archive: /archives/
     GitHub: https://github.com/zt515
+    Links: /links/
     Rss: /atom.xml
 
 favicon: /logo.png
