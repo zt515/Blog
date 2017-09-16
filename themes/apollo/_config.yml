@@ -1,0 +1,20 @@
+menu:
+    Blog: /
+    Archive: /archives/
+    GitHub: https://github.com/zt515
+    Rss: /atom.xml
+
+favicon: /logo.png
+logo: /logo.png
+
+# Comment
+# e.g disqus: seansun
+disqus:
+duoshuo:
+
+# Analytics
+# google-analytics:
+ga: UA-65933410-1
+
+# Copyright Infomation
+startyear: 2016
