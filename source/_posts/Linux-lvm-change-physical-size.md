@@ -1,7 +1,7 @@
 ---
 title: Linux LVM 更改物理分区大小
 date: 2017-10-21 18:05:19
-tags:
+tags: linux
 ---
 
 ## 什么是 LVM
