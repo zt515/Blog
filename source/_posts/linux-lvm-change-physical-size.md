@@ -84,7 +84,9 @@ ubuntu@ubuntu:~$ sudo pvs -v --segments /dev/sda1
 4. 接下来呢？当然是 `sudo parted` 咯～
 
 ## 后话
+<div class="tip">
 数据无价，请做好备份！！！
+</div>
 
 ## 文中参考的资料
 > [Ask Ubuntu - How to shrink Ubuntu LVM logical and physical volumes?](https://askubuntu.com/questions/252204/how-to-shrink-ubuntu-lvm-logical-and-physical-volumes)

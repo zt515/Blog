@@ -84,4 +84,6 @@ void exec(int *pc) {
 ### 后话
 本文章只是做一个粗略的理论分析，具体效果可以查看 [DragonVM](https://github.com/CovariantStudio/dragon-vm) 的实现，`DragonVM` 对支持此拓展的编译器使用 `Threaded Interpreting`，而对不支持的则使用 `跳转表 + 函数指针` 的方式来进行指令解码和分派。
 
-而且，`goto *opcodes_labels[*pc++]` 这行代码是非常不安全的（具体原因因为篇幅问题不再赘述），解决办法之一就是在运行前先检查一次代码是否合法。
+<div class="tip">
+特别注意：`goto *opcodes_labels[*pc++]` 这行代码是非常不安全的（具体原因因为篇幅问题不再赘述），解决办法之一就是在运行前先检查一次代码是否合法。
+</dic>
