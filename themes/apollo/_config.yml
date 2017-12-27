@@ -5,8 +5,8 @@ menu:
     Links: /links/
     Rss: /atom.xml
 
-favicon: /logo.png
-logo: /logo.png
+favicon: https://raw.githubusercontent.com/zt515/Blog/master/themes/apollo/source/logo.png
+logo: https://raw.githubusercontent.com/zt515/Blog/master/themes/apollo/source/logo.png
 
 language: zh-cn
 
