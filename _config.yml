@@ -85,6 +85,9 @@ archive_generator:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
     type: git
-    repo: git@electron:/home/git/blog.git
+    repo: 
+        github: git@github.com:imkiva/imkiva.github.io.git
+        #electron: git@electron:/home/git/blog.git
     branch: master
     message: 
+
