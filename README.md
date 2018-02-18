@@ -1,5 +1,5 @@
 # Blog
 My personal blog.
 
-Visit: [Blog](https://kernel19.cc)
+Visit: [Blog](https://imkiva.com)
 
