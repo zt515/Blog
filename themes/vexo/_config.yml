@@ -1,7 +1,7 @@
 author: yanm1ng # 作者
 description: Kiva's Blog
 keyword: hexo-theme, vuejs
-favicon: https://raw.githubusercontent.com/imkiva/Blog/master/logo.png
+favicon: https://coding.net/u/Kiva/p/Kiva.coding.me/git/raw/master/css/images/logo.png
 
 excerpt_link: Read more
 
@@ -43,7 +43,7 @@ baidu_id:
 
 about: 
   banner: http://file.muyutech.com/about.jpg
-  avatar: https://raw.githubusercontent.com/imkiva/Blog/master/themes/apollo/source/logo.png
+  avatar: https://coding.net/u/Kiva/p/Kiva.coding.me/git/raw/master/css/images/logo.png
   description: "Talk is cheap, show me the code."
   github_username: imkiva
 
