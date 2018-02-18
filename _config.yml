@@ -4,7 +4,7 @@
 
 # Site
 title: Kiva 的博客
-subtitle: Kernel19
+subtitle: 不敢说会写代码
 description:
 author: Kiva
 language: zh-cn
@@ -12,7 +12,7 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://kernel19.cc
+url: https://imkiva.com
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
