@@ -86,7 +86,8 @@ archive_generator:
 deploy:
     type: git
     repo: 
-        github: git@github.com:imkiva/imkiva.github.io.git
+        #github: git@github.com:imkiva/imkiva.github.io.git
+        coding: git@git.coding.net:Kiva/Kiva.coding.me.git
         #electron: git@electron:/home/git/blog.git
     branch: master
     message: 
