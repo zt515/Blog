@@ -35,19 +35,30 @@ List<Animal> list = new ArrayList<Cat>(); // 不可以，List<Cat> 不是 List<A
 ## 上届通配符
 ```java
 List<? extends Cat> list = new ArrayList<>(); // 保证存放猫科动物或猫科动物的子类的列表
-list.add(new Tiger()); // 不可以, 列表中存放虽然是猫科动物，但猫科动物那么多，不一定是 Tiger
-list.add(new Cat()); // 不可以, 列表中存放虽然是猫科动物，但猫科动物那么多，不一定是 Cat
+list.add(new Tiger());  // 不可以, 列表中存放虽然是猫科动物或猫科动物的子类
+                        // 但猫科动物的子类那么多，不一定是 Tiger
+                        // (Tiger 类型不一定可以转换成列表中存放的类型)
+
+list.add(new Cat());    // 不可以, 列表中存放虽然是猫科动物或猫科动物的子类
+                        // 但猫科动物的子类那么多，不一定是 Cat
+                        // (Cat 类型不一定可以转换成列表中存放的类型)
+
 list.add(new Animal()); // 不可以, 强行扩大范围，Animal 不一定是猫科动物
-Cat cat = list.get(0); // 可以，列表中存放的都是猫科动物
+Cat cat = list.get(0);  // 可以，列表中存放的都是猫科动物
+                        // (列表中存放的类型一定可以转换为 Cat 类型)
 ```
 
 ## 下届通配符
 ```java
 List<? super Cat> list = new ArrayList<>(); // 保证存放猫科动物或猫科动物的父类的列表
-list.add(new Tiger()); // 可以, Tiger 一定是猫科动物
-list.add(new Cat()); // 可以, Cat 一定是猫科动物
+list.add(new Tiger());  // 可以, Tiger 一定是猫科动物
+                        // (Tiger 类型一定可以转换为 Cat 类型)
+
+list.add(new Cat());    // 可以, Cat 一定是猫科动物
+                        // (Cat 类型一定可以转换为 Cat 类型)
+                        
 list.add(new Animal()); // 不可以, Animal 不一定是猫科动物
-Cat cat = list.get(0); // 不可以, 不知道 list 中存放的到底是哪种猫科动物，不一定是 Cat
+Cat cat = list.get(0);  // 不可以, 不知道 list 中存放的到底是哪种猫科动物，不一定是 Cat
 ```
 
 有人问："`List<? super Cat> list;` `list` 不是**存放猫科动物或猫科动物的父类**的列表吗？`Animal` 是 `Cat` 的父类，为什么不能 `list.add(new Animal())` 呢？"
