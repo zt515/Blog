@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Kiva 的博客
+title: 身无所拘，心无疆
 subtitle: 不敢说会写代码
 description:
 author: Kiva
-language: zh-cn
+language: en
 timezone:
 
 # URL
@@ -86,9 +86,7 @@ archive_generator:
 deploy:
     type: git
     repo: 
-        #github: git@github.com:imkiva/imkiva.github.io.git
         coding: git@git.coding.net:Kiva/Kiva.coding.me.git
-        #electron: git@electron:/home/git/blog.git
     branch: master
     message: 
 
