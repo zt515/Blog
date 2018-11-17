@@ -33,28 +33,55 @@ head (x:_) = x
 我们用一个例子来演示这个过程
 假定有函数 `f :: a -> b`，我们需要推导函数 `twice f x = f (f x)` 的类型 
 
-##### 从简单开始
+##### f x
 上面提到函数 `f :: a -> b`，那么对于 `f x`，既然 `x` 可以作为 `f` 的参数，那么 `x` 一定可以作为 `a` 来使用，这就是一个最基本的类型推导。我们将这一过程记为：
 
 $$\frac{f :: a \to b \quad x :: a}{f\ \ x :: b}$$
 
-##### 目标
+##### f (f x)
 我们先按照上面的定义写出 `f (f x)` 的类型
 
 $$\frac{f :: a \to b \quad f\ \ x :: a}{f\ \ (f \ \ x) :: b}$$
 
 然后再将 `f x` 展开，得到
 
-$$\frac{f :: a \to b \quad \frac{f\ \ ::\ \ c \to a \quad x\ \ ::\ \ c}{f\ \ x\ \ ::\ \ a}}{f\ \ (f \ \ x) :: b}$$
+$$\frac{f\ ::\ a \to b \quad \frac{f\ ::\ c \to a \quad x\ ::\ c}{f\ x\ ::\ a}}{f\ \ (f \ x)\ ::\ b}$$
 
 而又由于**`f`都是同一个函数**，所以**上面提到的类型 \\(a \to b\\) 和 \\(c \to a\\) 中，箭头左右两边对应的类型应该被推导为相同类型**，记为 \\(a \equiv c\\) 和 \\(b \equiv a\\) (或者 \\(a \sim c\\) 和 \\(b \sim a\\))
 
 然后我们做一组替换，把所有的 `c` 换成 `a`，把所有的 `b` 也换成 `a`，记为 \\(c \mapsto a\\) 和 \\(b \mapsto a\\)，于是我们得到了
 
-$$\frac{f :: a \to a \quad \frac{f\ \ ::\ \ a \to a \quad x\ \ ::\ \ a}{f\ \ x\ \ ::\ \ a}}{f\ \ (f \ \ x) :: a}$$
+$$\frac{f\ ::\ a \to a \quad \frac{f\ ::\ a \to a \quad x\ ::\ a}{f\ \ x\ ::\ a}}{f\ \ (f \ x)\ ::\ a}$$
 
 再由上面的定义可以得到，`f :: a -> a`, `x :: a`, `f (f x) :: a`
 所以 twice 即为 `twice :: (a -> a) -> a -> a`
+
+##### const id
+我们有 `const :: x -> y -> x`  和 `id :: a -> a` ，现在我们需要推导 `const id` 的类型
+
+仿照上例不难得出：
+
+$$\frac{const\ ::\ a \to b \quad id\ ::\ a}{const\ id\ ::\ b}$$
+
+先分析 `const :: x -> y -> x` ，因为有 \\(a \to b \equiv  x \to (y \to x)\\)
+
+所以做替换：\\(a \mapsto x\\) 和 \\(b \mapsto y \to x\\)
+
+然后我们得到了
+
+$$\frac{const\ ::\ x \to (y \to x) \quad id\ ::\ x}{const\ id\ ::\ y \to x}$$
+
+接着再分析 `id :: a -> a` ，因为有  \\(x \equiv  a \to a\\)
+
+所以做替换 \\(x \mapsto a \to a\\) 
+
+得到
+
+$$\frac{const\ ::\ x \to (y \to a \to a) \quad id\ ::\ a \to a}{const\ id\ ::\ y \to a \to a}$$
+
+看看分母！是不是就是 `const id` 的类型吗！
+
+因为类型变量可以更改名字，所以我们得到结论： `const id :: a -> b -> b`
 
 #### 最后引出相关概念
 - **`Unification`** (化一)
