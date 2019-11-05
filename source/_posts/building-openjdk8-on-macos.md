@@ -5,12 +5,22 @@ tags: JVM
 ---
 
 > Java 的水平并不是看了几本虚拟机与并发的书籍就可以搞定的。
-> 作为靠 Java 吃饭的人，你需要不断试错，耗费时间，刻意练习总结才能提高自己的Java水平。
+> 而是应该一头扎进~~痛苦~~的 JVM 源码海洋......
 
 <!-- more -->
 
+
+## ChangeLog
+* 2018-02-24: 初次完成
+* 2018-05-17: 新增 freetype 错误解决方案（评论区）
+* 2019-10-21: 在 macOS Catalina 上重新测试
+
+
+## 环境
+* macOS Catalina 10.15
+
 ## 准备工作
-* [Xcode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12)
+* [Xcode 11](https://itunes.apple.com/us/app/xcode/id497799835?mt=12)
 
 * xcode-select
     ```shell
@@ -26,7 +36,13 @@ tags: JVM
 
 * [XQuartz](https://www.xquartz.org/)
 
-* JDK 8
+* JDK 8 
+    ```shell
+    $ java -version
+    java version "1.8.0_162"
+    Java(TM) SE Runtime Environment (build 1.8.0_162-b12)
+    Java HotSpot(TM) 64-Bit Server VM (build 25.162-b12, mixed mode)
+    ```
 
 * freetype
     ```shell
@@ -61,7 +77,6 @@ $ bash ./get_source.sh
     export ALLOW_DOWNLOADS=true
     # 并行编译的线程数，编译时间长，为了不影响其他工作，我选择为2
     export HOTSPOT_BUILD_JOBS=2
-    export ALT_PARALLEL_COMPILE_JOBS=2
     # 是否跳过与先前版本的比较
     export SKIP_COMPARE_IMAGES=true
     # 是否使用预编译头文件，加快编译速度
@@ -85,19 +100,21 @@ $ bash ./get_source.sh
     # 加上产生调试信息时需要的 objcopy
     export OBJCOPY=gobjcopy
     ```
+    
 
-    然后 `source envsetup.sh`
+然后 `source envsetup.sh`
 
 ## configure
 执行以下命令
 ```shell
 $ bash ./configure \
     --with-target-bits=64 \
-    --with-debug-level=slowdebug--enable-debug-symbols \
+    --with-debug-level=slowdebug \
+    --enable-debug-symbols \
     ZIP_DEBUGINFO_FILES=0
 ```
 
-* 错误 1
+### 错误 1
 ```shell
 configure: error: GCC compiler is required. Try setting --with-tools-dir.
 ```
@@ -129,7 +146,7 @@ Build performance summary:
 $ make all
 ```
 
-* 错误 1
+### 错误 1
 ```shell
 /Users/kiva/Documents/OpenJDK8/jdk8/hotspot/src/share/vm/code/relocInfo.hpp:367:27: error: friend declaration specifying a default argument must be a definition
 inline friend relocInfo prefix_relocInfo(int datalen = 0);
@@ -146,31 +163,90 @@ inline relocInfo prefix_relocInfo(int datalen) {
 搜索 `int datalen`, 第 462 行，改为 `int datalen = 0`
 ![Error1Step2](/images/building-openjdk8-make-all-error-1-step-2.png)
 
-* 错误 2
+### 错误 2
 ```shell
 /Users/kiva/Documents/OpenJDK8/jdk8/hotspot/src/share/vm/opto/loopPredicate.cpp:775:73: error: ordered comparison between pointer and zero ('const TypeInt *' and 'int')
     assert(rng->Opcode() == Op_LoadRange || _igvn.type(rng)->is_int() >= 0, "must be");
 ```
-    解决办法：
-    `_igvn.type(rng)->is_int() >= 0` 改成 `_igvn.type(rng)->is_int()->_lo >= 0`
 
-* 错误 3
+解决办法：
+`_igvn.type(rng)->is_int() >= 0` 改成 `_igvn.type(rng)->is_int()->_lo >= 0`
+
+### 错误 3
 ```shell
 /Users/kiva/Documents/OpenJDK8/jdk8/hotspot/src/share/vm/runtime/virtualspace.cpp:331:14: error: ordered comparison between pointer and zero ('char *' and 'int')
 if (base() > 0) {
 ```
-    解决办法：
-    `base() > 0` 改成 `base() != 0`
 
-* 错误 4
+解决办法：
+`base() > 0` 改成 `base() != 0`
+
+### 错误 4
 ```shell
 Running nasgen
 Exception in thread "main" java.lang.VerifyError: class jdk.nashorn.internal.objects.ScriptFunctionImpl overrides final method setPrototype.(Ljava/lang/Object;)V
 ```
-    解决办法：
-    修改 `nashorn/make/BuildNashorn.gmk`
-    第 80 行 `-cp` 修改为 `-Xbootclasspath/p:` 注意这里有个 `:`
-    修改完成以后是这样 `-Xbootclasspath/p:$(NASHORN_OUTPUTDIR)/...`
+
+解决办法：
+修改 `nashorn/make/BuildNashorn.gmk`
+第 80 行 `-cp` 修改为 `-Xbootclasspath/p:` 注意这里有个 `:`
+修改完成以后是这样 `-Xbootclasspath/p:$(NASHORN_OUTPUTDIR)/...`
+
+### 错误 5
+```shell
+compiling /users/kiva/documents/openjdk8/jdk8/hotspot/src/share/vm/adlc/dfa.cpp warning: include path for stdlibc++ headers not found; pass '-stdlib=libc++' on the command line to use the libc++ standard library instead [-wstdlibcxx-not-found]
+```
+
+原因：Xcode 10 以后移除了 libstdc++ 的支持，而 hotspot 这个辣鸡居然还一直用着这个，于是编译器找不到 libstdc++ 的头文件就罢工了
+解决办法：
+打开 [这个链接](https://github.com/imkiwa/xcode-missing-libstdc-), clone 到本地，参考 `install.sh` 将文件链接或者复制到对应位置（**慎重直接执行，请一定事先核对路径是否正确！**）
+
+### 错误 6
+```objc
+/Users/kiva/Documents/OpenJDK8/jdk8/hotspot/agent/src/os/bsd/MacosxDebuggerLocal.m:27:9: fatal error: 'JavaNativeFoundation/JavaNativeFoundation.h' file not found
+#import <JavaNativeFoundation/JavaNativeFoundation.h>
+```
+
+原因：因为 Xcode 之前会安装类似 xxx-for-java-command-lines-tools 的框架包到 /System/Library/Frameworks, 而自从 macOS 10.14 开始，这些框架包全部都被安装到了 /Library/Developer/CommandLineTools/SDKs/MacOSX10.1x.sdk
+
+解决方法：
+先在终端下执行
+
+```shell
+$ find / -name "*JavaNativeFoundation.h*"
+...
+/Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Frameworks/JavaNativeFoundation.framework/Versions/A/Headers/JavaNativeFoundation.h
+/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/JavaVM.framework/Versions/A/Frameworks/JavaNativeFoundation.framework/Versions/A/Headers/JavaNativeFoundation.h
+...
+```
+
+然后可以得出真正的 `JavaVM.framework` 是被安装到了 `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/JavaVM.framework/` 下，于是我们对 `hotspot/make/bsd/makefiles.saproc.make` 这个文件做如下修改
+
+将
+![error610](/images/building-openjdk-make-all-error6-from1.png)
+修改为
+![error611](/images/building-openjdk-make-all-error6-to1.png)
+
+将
+![error620](/images/building-openjdk-make-all-error6-from2.png)
+修改为
+![error621](/images/building-openjdk-make-all-error6-to2.png)
+
+### 错误 7
+```shell
+fatal error: 'CoreGraphics/CGBase.h' file not found
+#import <CoreGraphics/CGBase.h>
+```
+
+解决办法：这个问题的原因跟上面的一样。涉及到两个文件：
+* `jdk/make/lib/PlatformLibraries.gmk`
+* `jdk/make/lib/Awt2dLibraries.gmk`
+
+将包含 `ApplicationServices.framework` 的路径替换成 `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreGraphics.framework`
+
+将包含 `JavaVM.framwork` 的路径替换成 `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/JavaVM.framework/Frameworks`
+
+上面的路径都可以通过 `find / -name ...` 找到
 
 ## 完成
 最后我们看到了这样的输出
@@ -209,3 +285,5 @@ OpenJDK 64-Bit Server VM (build 25.0-b70-debug, mixed mode)
 >[MAC 编译 OpenJDK8](https://github.com/ydcun/Java/blob/master/java/src/main/java/com/ydcun/openjdk/jdk8/MAC%E7%BC%96%E8%AF%91OpenJDK8.md)
 >[mac 编译 openjdk8 记录](http://blog.csdn.net/yuankundong/article/details/78876523)
 >[编译 openjdk 过程中遇到的错误](https://xiexianbin.cn/java/2017/03/15/OpenJDK-compile-error)
+>[How to elegantly compile OpenJDK (Mac version)](http://www.programmersought.com/article/6281426636/)
+>[mac 10.13.x 编译 openjdk8](https://www.jianshu.com/p/d9a1e1072f37)
