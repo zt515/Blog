@@ -1,5 +1,5 @@
 ---
-title: thoughts-inspired-by-zhu-xun
+title: Thoughts Inspired by ZhuXun
 date: 2019-10-24 15:35:16
 tags: personality
 ---
