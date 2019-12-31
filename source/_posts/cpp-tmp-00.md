@@ -32,6 +32,43 @@ tags: C++
 - 邮箱 [imkiva@icloud.com](mailto:imkiva@icloud.com)
 - [**漂    流    瓶**](http://qqapp.qq.com/app/389.html)
 
+## 致谢
+- 感谢好友 [mikecovlee](https://github.com/mikecovlee) 不厌其烦回答我的问题
+- 感谢好友 [newNcy](https://github.com/newNcy) 问了上面截图的那个问题
+
+## 模版元编程是什么？有什么用？
+断句：模版/元编程
+
+</br>
+
+所谓「元编程」，就是一种「抽象的编程」。我认为，对程序的抽象其实就是**找出程序之间的相似之处，然后用统一的逻辑将其表示出来，而对于程序之间的不同之处，我们用一种手段将他们隐藏起来**。在 C++ 中，这种手段就叫做「模版」，表示统一的逻辑的方式就叫「元编程」。
+
+</br>
+
+C++ 标准库是「泛型编程（Generic Programming）」的实践，这意味着数据和算法是分开的。算法最终需要的不过就是数据的比大小而已，所以我们需要用模版将算法的逻辑「抽象化」，比如我们知道标准库里有这样的算法:
+
+```cpp
+template <class T>
+const T& min(const T& a, const T& b)
+{
+    return a < b ? a : b;
+}
+```
+
+这里的 `T` 我们不用管是什么，我们只要知道，这个算法会返回二者中较小的一个，而至于怎么比较 `a` 和 `b`，那跟我 `min` 有什么关系？
+
+</br>
+
+所以在我的理解中，「模版」给了我们抽象算法的能力，算法是通用的，但仅仅只靠「模版」来抽象具体类型却不足以帮助我们写出通用的算法逻辑，我们还需要更强大的功能，来帮我们设计出更通用、更友好、更健壮、错误信息更可读的代码，于是就有了「元编程」。
+
+## 花费大量时间学习模版元编程，值得吗？
+不值得，你可以关掉这个页面了。
+
+那我为什么要学？我只是觉得好玩罢了。
+
+## 为什么歧视 MSVC？
+我不是，我没有，你不要乱说啊。
+
 ## 模版参数命名约定
 模版参数是指 `template <typename T>` 里的 `T`，其**定义域**为**所有类型**。
 给这个参数取个**好名字**跟**禁用 Windows 自动更新**一样重要。
@@ -104,7 +141,104 @@ S<T> {
 在一些资料书中，上面的模版 `S` 也被叫做**元函数 (metafunction)**，
 可见我的暴论都没说错。
 
+但是在后续的文章中，我依然会把类型和数值分开称呼（原因就在下面），但你得知道 TMP 是能**把类型当作数值一样来做运算的**。
+
+</br>
+
+那么 TMP 能不能操作 C++ 里的那些 `int`, `flaot`... 呢？当然可以！比如：
+
+```cpp
+// 接受一堆类型作为参数
+template <typename ... Ts>
+struct T {};
+
+// 接受一堆 int 作为参数
+template <int ... Is>
+struct I {};
+
+void foo() {
+    using t1 = I<1, 2, 3, 4>;
+    using t2 = T<int, char, short>;
+}
+```
+
+怎么样？现在看出那个 `typename` 的意思了吗？
+是不是相当于「**类型的类型**」呢？
+
+</br>
+
+怎么样？那个 `using` 是不是觉得很微妙？
+像不像是在定义一个「常量」？
+（`using` 定义出来的是类型，which is immutable）
+
+## 暴论三：TMP 没有停机性检查
+
+啥叫停机性检查？我们写个代码来看看：
+
+```cpp
+template <size_t A, size_t B>
+struct Add {
+    static constexpr size_t result = Add<A + 1, B - 1>::result;
+};
+
+template <size_t A>
+struct Add<A, 0> {
+    static constexpr size_t result = A;
+};
+```
+
+`Add<A, B>` 可以在编译期计算 A + B，比如
+
+```cpp
+static_assert(Add<1, 2>  ::result == 3,   "You wrote a bug");
+static_assert(Add<50, 99>::result == 149, "You wrote a bug");
+```
+
+但是如果你试着把终止条件去掉，让 `Add<A, B>` 成为一个死循环，让代码长这样：
+
+```cpp
+template <size_t A, size_t B>
+struct Add {
+    static constexpr size_t result = Add<A + 1, B - 1>::result;
+};
+```
+
+我们再试着运行同样的代码，编译器会给出这样的错误：
+```
+fatal error: recursive template instantiation exceeded maximum depth of 1024
+```
+
+看到没？**C++ 编译器不会检查上面的代码是否能停机，而是限制模版展开次数。**
+
+事实上，从错误信息可以看出，就算终止条件存在，当 `Add<A, B>` 展开次数超过 1024 次时，编译器一样会报错。
+
+这也限制了一些特定的需求用 TMP 是无法完成的。（后文会详细讨论）
+但这也让一些骚操作成为可能。
+
+## 暴论四：TMP 是 duck-typing
+啥是 duck-typing（鸭子类型）？~~你 tnd 不会谷歌吗？~~
+
+简单的说，如果有这样的代码
+
+```cpp
+template <typename Duck>
+void meow(Dock &&duck) {
+    duck->meow();
+}
+```
+
+相信大家都能看出来，不管这个 `Duck` 在实例化的时候被替换成了什么类型，只要这个类型提供了 `meow()` 的成员方法，这段代码就能通过编译。
+
+</br>
+
+这就是所谓的
+
+> **当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子**
+
 ## 总结
 在与 TMP 打交道的过程中，请一定要记住这几点暴论，尤其是「**类型即数值**」，
 这点**真的很！重！要！**
 
+## 参考文献
+- [1] wuye9036, *[CppTemplateTutorial](https://github.com/wuye9036/CppTemplateTutorial)*
+- [2] Wikipedia, *[Duck Typing](https://en.wikipedia.org/wiki/Duck_typing)*
