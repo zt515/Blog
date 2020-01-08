@@ -8,6 +8,14 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
+    <!-- SECRET NOTICE START -->
+    <% if (page.secret) { %>
+      <div class="secret-notice qrcode">
+        <h2 class="notice" style="font-size: 14px">Secret Base: 只有作者十分信任的人才可以来到这个页面，希望你不要将其广为传播，谢谢。</h>
+      </div>
+      <br/>
+    <% } %>
+    <!-- SECRET NOTICE END -->
     <section class="markdown-content"><%- page.content %></section>
     <!-- Tags START -->
     <% if (page.tags && page.tags.length) { %>
@@ -21,7 +29,7 @@
     <%- partial('_partial/nav') %>
     <!-- NAV END -->
     <!-- 打赏 START -->
-    <% if (theme.donate) { %>
+    <% if (theme.donate && !page.secret) { %>
       <div class="money-like">
         <div class="reward-btn">
           赏
@@ -41,18 +49,18 @@
     <% } %>
     <!-- 打赏 END -->
     <!-- 二维码 START -->
-    <% if (theme.qrcode) { %>
+    <% if (theme.qrcode && !page.secret) { %>
       <div class="qrcode">
         <canvas id="share-qrcode"></canvas>
         <p class="notice">扫描二维码，分享此文章</p>
       </div>
     <% } %>
     <!-- 二维码 END -->
-    <% if (theme.comment === 'gitment') { %>
+    <% if (theme.comment === 'gitment' && !page.secret) { %>
       <!-- Gitment START -->
       <div id="comments"></div>
       <!-- Gitment END -->
-    <% } else if (theme.comment === 'uyan') { %>
+    <% } else if (theme.comment === 'uyan' && !page.secret) { %>
       <!-- UY START -->
       <div id="uyan_frame"></div>
       <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
