@@ -1,5 +1,5 @@
 ---
-title: 带着一本书回家
+title: Rushing home with a book
 date: 2020-01-09 22:45:45
 categories: secret-base
 secret: true
