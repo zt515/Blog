@@ -235,6 +235,43 @@ void meow(Dock &&duck) {
 
 > **当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子**
 
+## 暴论五：TMP 是动态类型和静态类型的混合语言
+
+举个例子就行啦:
+```cpp
+template <typename T>
+struct happy {
+    using type = int;
+};
+
+template <>
+struct happy<float> {
+    static constexpr int type = 1;
+};
+```
+
+上面的例子里，我们为 `happy` **特化**（下一章会讲）了 `float` 类型，于是只有 `happy<float>::type` 本身是一个值，而不是一个类型，其余的 `happy<...>::type` 都是一个类型。
+
+那么现在我们有一个元函数如下定义:
+
+```cpp
+template <typename T>
+using get_happy = typename happy<T>::type;
+```
+
+乍一看没什么问题，但当你把 float 作为参数传递给 get_happy 的时候，编译器无疑会抛出一个编译错误。
+
+```
+error: no type named 'type' in 'struct happy<float>'
+```
+
+这个问题的原因我们会在后续的文章中慢慢解释...
+
+那么静态类型表现在何处呢？
+
+自然是直接将数值作为模板参数传递的时候啊！
+
+
 ## 总结
 在与 TMP 打交道的过程中，请一定要记住这几点暴论，尤其是「**类型即数值**」，
 这点**真的很！重！要！**
