@@ -265,7 +265,7 @@ using get_happy = typename happy<T>::type;
 error: no type named 'type' in 'struct happy<float>'
 ```
 
-这个问题的原因我们会在后续的文章中慢慢解释...
+这个问题的原因我们会在后续的文章中慢慢解释...这里只能说是因为：**每个特化的分支中的定义是独立的**。
 
 那么静态类型表现在何处呢？
 
