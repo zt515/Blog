@@ -64,7 +64,7 @@ struct size<int *> {
 但你有一天忘记了你的具体实现，你只记得你曾经写过一个元函数，可以计算类型的大小，于是你写下了 `size<double *>::value` 这样的代码。最后你得到了这样的错误
 
 ```
-error: no member named 'value' in 'size<T>' [with T = double *]
+error: no member named 'value' in 'size<double *>'
 ```
 
 你一看~原来是没有为 double * 特化实现，于是你又写下了这样的代码
