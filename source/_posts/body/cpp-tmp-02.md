@@ -1,5 +1,5 @@
 ---
-title: C++ 模版元编程 第 2 章 --- 模板匹配和类型推导
+title: C++ 模版元编程 第 2 章 --- 模板匹配规则
 date: 2020-01-12 20:46:11
 tags: C++
 ---
@@ -107,4 +107,42 @@ struct size<P *> {
 };
 ```
 
-在上面的 `template` 里面加上一条 `typename P` 就行了，这就像在做一个声明：**我这里需要用到一个参数 P，这个参数 P 是一个类型名。**
+在上面的 `template` 里面加上一条 `typename P` 就行了，这就像在做一个声明：**我这里需要用到一个参数 P，这个 P 是一个类型名。**
+
+然后我们再把代码放一起来看:
+
+```cpp
+template <typename T>
+struct size;
+
+template <>
+struct size<int *> {
+    static constexpr size_t value = 8;
+};
+
+template <typename P>
+struct size<P *> {
+    static constexpr size_t value = 8;
+};
+```
+
+// TODO
+
+
+现在我们可以自然而然地引出模板匹配规则了
+
+## 模板匹配规则
+
+注意看上面的那个对指针类型的特化，我们说 P 是一个类型名，然而诸如像 `int *`, `double *` 之类的都是类型名。那么为什么还会匹配到 `P *` 呢？或者说，用 `P *` 匹配了 `double *` 后，`P` 是什么呢？
+
+我们不妨试一试
+
+```cpp
+template <typename T>
+struct what;
+
+template <typename P>
+struct what<P *> {
+    using type = P;
+};
+```
