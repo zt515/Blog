@@ -3,8 +3,6 @@ title: About
 layout: about
 ---
 
-## 我永远单推「泠鸢 yousa」
-
 #### 友情链接
 
 #### **[Covariant Institute](http://covariant.cn/)**
