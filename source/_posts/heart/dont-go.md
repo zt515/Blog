@@ -2,6 +2,7 @@
 title: いかないで
 date: 2020-02-27 20:32:23
 categories: secret-base
+banner: /images/secret/matsuri.png
 secret: true
 ---
 
