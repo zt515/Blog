@@ -1,6 +1,6 @@
 <main class="app-body">
   <% page.posts.each(function(post) { %>
-    <% if (!post.secret) { %>
+    <% if (!post.secret && !post.draft) { %>
       <article class="article-card">
         <h2 class="article-head">
           <a href="<%- url_for(post.path) %>"><%- post.title %></a>
