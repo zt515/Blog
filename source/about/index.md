@@ -11,3 +11,5 @@ layout: about
 
 #### **[Mystery0の小站](http://www.mystery0.vip/)**
 
+#### **[Funix's blog](https://funix.cn/)**
+
