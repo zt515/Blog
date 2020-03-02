@@ -126,6 +126,10 @@ struct TypeList {
 
 所以，这个集合里还需要包含「head」和「tail」。
 
+`head`: 取出这个列表的头部元素。
+
+`tail`: 去除这个列表的头部元素。
+
 那么，足够了吗？足够了。
 
 ## 我们先来实现 cons
@@ -198,6 +202,9 @@ struct tailI<List<T, Ts...>> {
 template <typename L>
 using tail = typename tailI<L>::type;
 ```
+
+这里故意没有对 `head` 和 `tail` 函数特化空列表，因为，
+对空列表做 `head` 和 `tail`，难道不是非法的吗（笑 ？
 
 ## 其他操作？
 其他操作都可以通过 `cons`, `head`, `tail` 三种基本操作组合出来，不信你试试？
