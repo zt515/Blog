@@ -6,8 +6,6 @@ tags: C++
 
 > 我今天又看了 10 MB 的错误信息
 
-**本文还未完成**
-
 <!-- more -->
 
 ## 导入
@@ -188,3 +186,127 @@ show<what_t<double *>>();
 [with T = 'double']
 ```
 
+所以，我们尝试用 P \* 去匹配 `double *`，如果匹配成功，那么 P 就变成了 `double`。
+有没有觉得像什么？模式匹配！
+
+没错，模板匹配规则，就是模式匹配。
+
+## 元编程中的模式匹配
+
+上面已经有了一个很生动的例子，用 P \* 匹配 `double *`，所以 P 是 `double`。
+那么能不能说的更笼统一点呢？
+
+~~当然可以，不然我还能自己把自己问死了？~~
+
+> Pattern Matching：compare something with its construction form
+> 模式匹配：将一个东西，按照其「构造的方式」进行对比
+
+当然上面这个版本需要进一步阐述：
+
+### 1. 构造？
+比如你有一个基本类型 `int`，我们就可以这个类型的基础上构造出 `int *` 类型。
+
+这里可以说 \* 是一个构造器，它接受一个类型，返回一个新类型。
+不妨用 `Star` 来代替 \*，于是就可以说：**`Star` 接受一个类型 `T`，返回新的类型 `Star(T)`**。
+用伪代码表示如下：
+```cpp
+Type Star(T) {
+    return T *;
+}
+```
+
+同理，用 `Const` 代替 `const` 关键字，我们说：**`Const` 接受一个类型 `T`，返回新的类型 `Const(T)`**。
+用伪代码表示如下：
+```cpp
+Type Const(T) {
+    return const T;
+}
+```
+
+这就是构造。~~我真的只能解释成这样了，呜哇啊啊啊啊啊啊啊啊~~
+
+### 2. 匹配？
+
+我们有一个值/类型 T，我们可以尝试用一个「表达式」(表达式中可以包含类型) 去跟 T 的「构造形式」做对比，这就叫「匹配」。
+匹配过程中，**尽可能地**让 T 的「构造形式」中**没有被被匹配的部分最少**。
+
+
+于是，我们就可以用 P * 尝试去匹配尽可能符合条件的 P。
+
+|       类型      |       P       |
+| :------------: | :-----------: |
+|  int \*        |    int        |
+|  int \*\*      |    int \*     |
+|  int \*\*\*\*  |    int \*\*\* |
+|  int(*)(int)   |    int(int)   |
+
+用上面的 `Const` 和 `Star` 举例子，如果写成伪代码：
+```cpp
+match (T) { /* 对 T 进行匹配 */
+    case Star(U)  => /* T 是 U * */
+    case Const(U) => /* T 是 const U */
+    case _        => /* T 两种都不是 */
+}
+```
+
+这就是匹配。~~我真的只能解释成这样了，呜哇啊啊啊啊啊啊啊啊~~
+
+
+## 具体例子？
+
+光说概念可能不好理解，我们直接上代码来看。
+
+我们知道，C++ 中的模板类并不是类型，而是类型构造器（即：模板类本身不能作为对象的类型，只有在实例化以后才可以）。
+就是这样:
+```cpp
+/* 错误，std::vector 不是类型，而是类型构造器 */
+std::vector v1;
+
+/* 正确，std::vector 接受一个类型参数 int，构造出(实例化)了类型 std::vector<int> */
+std::vector<int> v2;
+```
+
+所以我们这里就可以看出，std::vector 是类似于上面的 `Star`, `Const` 之类的构造器。
+于是我们就可以进行模式匹配:
+```cpp
+template <typename V>
+struct vector_value_type;
+
+template <typename ValueType>
+struct vector_value_type<std::vector<ValueType>> {
+/*                       ^^^^^^^^^^^^^^^^^^^^^^   */
+    using type = ValueType;
+};
+```
+
+注意看代码中标出来的地方，这里我们用跟上面一样的伪代码写出来就是这样:
+```cpp
+match (V) {
+    case std::vector<ValueType> => return ValueType;
+    case _                      => fuck;
+}
+```
+
+快！自己理解！~~我真的只能解释成这样了，呜哇啊啊啊啊啊啊啊啊~~
+
+## 来吧！解决问题！
+
+问题是啥来着？
+
+> 现在问题又来了，如果我想细化指针类型的 id 怎么办呢？
+> 比如现在我们需要这样操作，让 `id<P *> = id<P> + 100`，
+> 即下面这样的断言恒真（伪代码）:
+>
+> ```cpp
+> static_assert(id<P *>::value == id<P>::value + 100, "FUCK");
+> ```
+
+很简单啊：
+```cpp
+template <typename P>
+struct id<P *> {
+    static constexpr size_t value = 100 + id<P>::value;
+};
+```
+
+~~你说是吧？~~
