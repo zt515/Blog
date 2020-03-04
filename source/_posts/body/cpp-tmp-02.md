@@ -310,3 +310,30 @@ struct id<P *> {
 ```
 
 ~~你说是吧？~~
+
+## 实战：TypeList
+[戳这里](https://imkiva.com/blog/2020/03/body/cpp-tmp-practice-01/)
+
+## 实战：Function Parser
+<!-- [戳这里](https://imkiva.com/blog/2020/03/body/cpp-tmp-practice-02/) -->
+
+我们要从一个 Callable 的类型中，解析出返回类型，和参数类型。
+Callable 类型就是可以支持「函数调用语法」的类型，比如本身就是个函数，
+或者重载了 `operator()`（即 Functor 类型）。
+
+我们不妨先参照上面的伪代码，写出 Function Parser 的伪代码:
+```cpp
+/* 模式匹配 Callable 类型 */
+match (Callable) {
+    case R(Args...)             => /* 是函数，或者类静态函数 */
+    case R(Class::*)(Args...)   => /* 是成员函数 */
+
+    /* 不是函数/函数指针，那么是 Functor 吗？*/
+    case _ => match (decltype(&Callable::operator())) {
+                  case R(Class::*)(Args...) => /* 是 Functor */
+                  case _                    => /* 不是，滚    */
+              }
+}
+```
+
+具体代码实现：[libmozart/function.hpp](https://github.com/libmozart/core/blob/bd432a29d9e56cecb4b89e7a8cdb7280981814fc/mozart%2B%2B/mpp_core/function.hpp#L58)
