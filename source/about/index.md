@@ -13,3 +13,7 @@ layout: about
 
 #### **[Funix's blog](https://funix.cn/)**
 
+
+#### Resume
+
+#### [resume.pdf](http://mirror.imkiva.com/resume/resume.pdf)
