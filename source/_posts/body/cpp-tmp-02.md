@@ -336,4 +336,129 @@ match (Callable) {
 }
 ```
 
-具体代码实现：[libmozart/function.hpp](https://github.com/libmozart/core/blob/bd432a29d9e56cecb4b89e7a8cdb7280981814fc/mozart%2B%2B/mpp_core/function.hpp#L58)
+### 分析
+
+TMP 的常用套路之一就是：先实现一个通用版本，然后在这个通用版本的基础上进行特化。
+```cpp
+template <typename Callable>
+struct function_parser {
+    /* 什么都不做 */
+};
+```
+
+接着看上面的第一个匹配式子: `case R(Args...)`，我们这样匹配它
+```cpp
+template <typename R, typename ...Args>
+struct function_parser<R(Args...)> {
+    using return_type = R;
+    using arg_types = TypeList::List<Args...>;
+    using function_type = std::function<R(Args...)>;
+};
+```
+
+再强调一次，特化处的 `template <typename R, typename ...Args>` 是用于声明需要用到哪些参数的，
+也就是声明模式匹配表达式 `case R(Args...)` 里的 `R` 和 `Args`。
+
+通用版本里的模板参数声明的意义与特化中的**完全不同**，千万不要弄混淆了！！
+
+<br/>
+
+然后是第二个匹配表达式: `case R(Class::*)(Args...)`
+```cpp
+template <typename Class, typename R, typename ...Args>
+struct function_parser<R(Class::*)(Args...)> {
+    using return_type = R;
+    using arg_types = TypeList::List<Class&, Args...>;
+    using class_type = Class;
+    using function_type = std::function<R(Class&, Args...)>;
+};
+```
+
+注意这里的 `arg_types` 和 `function_type`，他们的第一个参数都多了一个 `Class &`，
+这是因为，现在匹配的是成员函数，而成员函数都需要一个 `this`，这个 `this` 自然就是 `Class &`.
+
+<br/>
+
+现在我们已经完成了前两个模式匹配了，但第三个是一个通配符（即前两个都没匹配到），
+那么在 TMP 里应该怎么对应呢？
+
+没错，就是我们一开始写的那个通用版本，我们再搬出来看看:
+```cpp
+template <typename Callable>
+struct function_parser {
+};
+```
+
+我们需要在这个地方对 `decltype(&Callable::operator())` 再进行一次模式匹配，
+所以现在我就要祭出 TMP 中常用的第二个法宝：**继承**。
+
+<br/>
+
+这里我们应该进行的模式匹配中，也会包含 `case R(Class::*)(Args...)` 这个模式，
+而这个模式的处理我们已经实现过了，所以我们让 `function_parser` 的通用版本继承自己的某个特化版本，
+这样，在所有模式都匹配不到的时候，重新匹配第二次，这样不就行了嘛？
+
+```cpp
+template <typename Callable>
+struct function_parser : public function_parser<decltype(&Callable::operator())> {
+};
+```
+
+这样，就完成了整个模式匹配的过程。但值得一提的是，
+上面这样的写法存在不足之处：**匹配到 lambda 表达式** 的具体类型无法转换。
+比如:
+```cpp
+auto lambda = []() { printf("yes"); };
+using FT = typename function_parser<decltype(lambda)>::function_type;
+FT f = lambda; /* error! */
+```
+
+为啥呢？
+
+<br/>
+
+这就要讲一下 Functor 和一般的成员函数的不同了。
+Functor 是重载了 `operator()` 的对象，而这个函数正好是个成员函数，
+所以我们直接匹配 **`Callable::operator()`** 这个函数的类型的时候，
+我们一定会进入到 `R(Class::*)(Args...)` 这个分支中，但是这个分支中，
+我们必须让参数列表的第一个参数是 `this`，**但 `Functor` 是不需要的**，
+这便是冲突的原因。
+
+<br/>
+
+那怎么解决呢？
+
+很简单，我们单独为 Functor 做一个 Functor Parser 就行了。
+
+```cpp
+template <typename F>
+struct functor_parser : public functor_parser<decltype(&F::operator())> {
+};
+
+template <typename Class, typename R, typename ...Args>
+struct functor_parser<R(Class::*)(Args...)> {
+    using function_type = FunctionAlias<R(Args...)>;
+    using return_type = R;
+    using class_type = Class;
+};
+```
+
+然后我们让 Function Parser 的通用版本继承自 Functor Parser:
+```cpp
+template <typename Callable>
+struct function_parser : public functor_parser<Callable> {
+};
+```
+
+大功告成！
+
+
+### 工业化版本
+实际的版本中，需要考虑的情况还有 const 和函数指针，由于本篇文章只是讲解核心部分，
+所以这些不那么重要的就忽略了。
+
+<br/>
+这里是一份跑在生产环境的 Function Parser：[libmozart/function.hpp](https://github.com/libmozart/core/blob/bd432a29d9e56cecb4b89e7a8cdb7280981814fc/mozart%2B%2B/mpp_core/function.hpp#L58)
+
+也许会有帮助！
+
