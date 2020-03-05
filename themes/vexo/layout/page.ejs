@@ -56,15 +56,8 @@
       </div>
     <% } %>
     <!-- 二维码 END -->
-    <% if (theme.comment === 'gitment' && !page.secret) { %>
-      <!-- Gitment START -->
-      <div id="comments"></div>
-      <!-- Gitment END -->
-    <% } else if (theme.comment === 'uyan' && !page.secret) { %>
-      <!-- UY START -->
-      <div id="uyan_frame"></div>
-      <script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js"></script>
-      <!-- UY END -->
+    <% if (theme.comment === 'gitalk' && !page.secret) { %>
+      <div id="gitalk-container"></div>
     <% } else { %>
       <!-- No Comment -->
     <% } %>
@@ -131,31 +124,21 @@
       value: document.location.href
     });
 
-    // gitment
-    var gitmentConfig = "<%= theme['gitment_owner'] %>";
-    if (gitmentConfig !== 'undefined') {
-      var gitment = new Gitment({
+    // gitalk
+    var gitalkConfig = "<%= theme['gitalk_owner'] %>";
+    if (gitalkConfig !== 'undefined') {
+      var gitalk = new Gitalk({
+        clientID: "<%= theme['gitalk_oauth_id'] %>",
+        clientSecret: "<%= theme['gitalk_oauth_secret'] %>",
+        repo: "<%= theme['gitalk_repo'] %>",
+        owner: "<%= theme['gitalk_owner'] %>",
+        admin: ["<%= theme['gitalk_owner'] %>"],
         id: "<%- page.title %>",
-        owner: "<%= theme['gitment_owner'] %>",
-        repo: "<%= theme['gitment_repo'] %>",
-        oauth: {
-          client_id: "<%= theme['gitment_oauth_id'] %>",
-          client_secret: "<%= theme['gitment_oauth_secret'] %>"
-        },
-        theme: {
-          render(state, instance) {
-            const container = document.createElement('div')
-            container.lang = "en-US"
-            container.className = 'gitment-container gitment-root-container'
-            container.appendChild(instance.renderHeader(state, instance))
-            container.appendChild(instance.renderEditor(state, instance))
-            container.appendChild(instance.renderComments(state, instance))
-            container.appendChild(instance.renderFooter(state, instance))
-            return container;
-          }
-        }
-      })
-      gitment.render(document.getElementById('comments'))
+        distractionFreeMode: true,
+        pagerDirection: 'first',
+      });
+
+      gitalk.render('gitalk-container');
     }
   })();
 </script>

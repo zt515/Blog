@@ -26,19 +26,13 @@ donate: true
 # qrcode
 qrcode: true
 
-# comment
-# you can set gitment or uyan
+comment: gitalk
 
-comment: gitment
-
-# gitment config
-gitment_owner: imkiva
-gitment_repo: Blog
-gitment_oauth_id: c65c479a3282ef71e914
-gitment_oauth_secret: 1bab3c3e3354861f37264c43eb275cb595057edd
-
-# uyan
-# if you want to use uyan as your blog comment, plz remove/comment out gitment config
+# gitalk config
+gitalk_owner: imkiva
+gitalk_repo: Blog
+gitalk_oauth_id: c65c479a3282ef71e914
+gitalk_oauth_secret: 1bab3c3e3354861f37264c43eb275cb595057edd
 
 baidu_id: 
 

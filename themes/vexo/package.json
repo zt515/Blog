@@ -33,7 +33,6 @@
       "NProgress"
     ],
     "ignore": [
-      "source/js/gitment.js",
       "source/js/qrious.js"
     ]
   }

@@ -19,7 +19,6 @@
 * Fully Responsive
 * Baidu Analytics
 * [Youyan](http://www.uyan.cc/)
-* [Gitment](https://imsun.github.io/gitment/)
 * Share Qrcode
 * SEO
 * Immersive Status Bar
@@ -80,7 +79,6 @@ Add this to the top of your article markdown file.
 
 **2017-08-08**
 * Added article custom banner
-* Fixed gitment error
 
 **2017-06-27** 
 * Added image-zoom
@@ -120,21 +118,7 @@ Add this to the top of your article markdown file.
 * Adjust home post display problem
 * Thanks @ky0ncheng issue
 
-## Comment
-
-Vexo use [Gitment](https://github.com/imsun/gitment) as the third party discussion system.
-
 You can easily complete your comment configuration by just adding your settings into `_config.yml`
-
-```
-# Gitment
-gitment_owner: yanm1ng
-gitment_repo: yanm1ng.github.io
-gitment_oauth_id: 
-gitment_oauth_secret: 
-```
-
-How to use Gitment ? [See](https://imsun.github.io/gitment/)
 
 ## Reward
 
