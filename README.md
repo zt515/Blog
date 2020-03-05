@@ -1,5 +1,5 @@
-# Blog
-My personal blog.
+blog-comments
+=============
 
-Visit: [Blog](https://imkiva.com)
+This repo contains all comments in my [blog](https://imkiva.com).
 
